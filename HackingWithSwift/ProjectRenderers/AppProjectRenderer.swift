@@ -7,26 +7,17 @@
 
 import UIKit
 
-struct AppProjectRenderer {
+struct AppProjectRenderer: Renderer {
+    var imageName: String
     var project: Project
     var colors = [UIColor(red: 27/255.0, green: 215/255.0, blue: 253/255.0, alpha: 1), UIColor(red: 30/255.0, green: 98/255.0, blue: 241/255.0, alpha: 1)]
 
     init(for project: Project) {
         self.project = project
+        self.imageName = project.title
     }
 
-    func drawTitleImage() -> UIImage {
-        if let cached = imageFromCache() {
-            return cached
-        }
-
-        let image = render()
-        cache(image)
-
-        return image
-    }
-
-    private func render() -> UIImage {
+    func render(_ colors: [UIColor], scale: CGFloat) -> UIImage {
         let format = UIGraphicsImageRendererFormat()
         format.scale = UIScreen.main.scale
         format.opaque = true
@@ -53,27 +44,54 @@ struct AppProjectRenderer {
             string.draw(at: CGPoint(x: 20, y: 150))
         }
     }
+}
 
-    private func imageFromCache() -> UIImage? {
-        let url = getCachesDirectory().appendingPathComponent(project.title)
-        let fm = FileManager.default
 
-        if fm.fileExists(atPath: url.path) {
-            if let data = try? Data(contentsOf: url) {
-                return UIImage(data: data, scale: UIScreen.main.scale)
-            }
-        }
+protocol Renderer {
+    var colors: [UIColor] { get }
+    var imageName: String { get }
+    
+    func drawTitleImage() -> UIImage
+    func cache(_ image: UIImage, named: String)
+    func getCachesDirectory() -> URL
+    func imageFromCache(_ named: String, scale: CGFloat) -> UIImage?
+    func render(_ colors: [UIColor], scale: CGFloat) -> UIImage
+}
 
-        return nil
-    }
 
-    private func cache(_ image: UIImage) {
-        let url = getCachesDirectory().appendingPathComponent(project.title)
-        try? image.pngData()?.write(to: url)
-    }
-
-    private func getCachesDirectory() -> URL {
+extension Renderer {
+    func getCachesDirectory() -> URL {
         let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
         return paths[0]
     }
+    
+    func cache(_ image: UIImage, named: String) {
+        let url = getCachesDirectory().appendingPathComponent(named)
+        try? image.pngData()?.write(to: url)
+    }
+    
+    func imageFromCache(_ named: String, scale: CGFloat = UIScreen.main.scale) -> UIImage? {
+        let url = getCachesDirectory().appendingPathComponent(named)
+        let fm = FileManager.default
+        
+        if fm.fileExists(atPath: url.path) {
+            if let data = try? Data(contentsOf: url) {
+                return UIImage(data: data, scale: scale)
+            }
+        }
+        
+        return nil
+    }
+    
+    func drawTitleImage() -> UIImage {
+        if let cached = imageFromCache(imageName) {
+            return cached
+        }
+        
+        let image = render(colors, scale: UIScreen.main.scale)
+        cache(image, named: imageName)
+        
+        return image
+    }
 }
+

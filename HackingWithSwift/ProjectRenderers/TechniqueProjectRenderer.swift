@@ -7,26 +7,17 @@
 
 import UIKit
 
-struct TechniqueProjectRenderer {
+struct TechniqueProjectRenderer: Renderer {
+    var imageName: String
     var project: Project
     var colors = [UIColor(red: 238/255.0, green: 79/255.0, blue: 182/255.0, alpha: 1), UIColor(red: 201/255.0, green: 68/255.0, blue: 255/255.0, alpha: 1)]
 
     init(for project: Project) {
         self.project = project
+        self.imageName = project.title
     }
 
-    func drawTitleImage() -> UIImage {
-        if let cached = imageFromCache() {
-            return cached
-        }
-
-        let image = render()
-        cache(image)
-
-        return image
-    }
-
-    private func render() -> UIImage {
+    func render(_ colors: [UIColor], scale: CGFloat) -> UIImage {
         let format = UIGraphicsImageRendererFormat()
         format.scale = UIScreen.main.scale
         format.opaque = true
@@ -52,28 +43,5 @@ struct TechniqueProjectRenderer {
             let string = NSAttributedString(string: text, attributes: attributes)
             string.draw(at: CGPoint(x: 20, y: 150))
         }
-    }
-
-    private func imageFromCache() -> UIImage? {
-        let url = getCachesDirectory().appendingPathComponent(project.title)
-        let fm = FileManager.default
-
-        if fm.fileExists(atPath: url.path) {
-            if let data = try? Data(contentsOf: url) {
-                return UIImage(data: data, scale: UIScreen.main.scale)
-            }
-        }
-
-        return nil
-    }
-
-    private func cache(_ image: UIImage) {
-        let url = getCachesDirectory().appendingPathComponent(project.title)
-        try? image.pngData()?.write(to: url)
-    }
-
-    private func getCachesDirectory() -> URL {
-        let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
-        return paths[0]
     }
 }
