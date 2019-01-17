@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SettingsViewController: UIViewController {
+class SettingsViewController: UIViewController, LoggerHandle {
     @IBOutlet var name: UITextField!
     @IBOutlet var projects: UISegmentedControl!
 

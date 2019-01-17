@@ -34,5 +34,3 @@ extension LoggerHandle {
     }
 }
 
-extension UIViewController: LoggerHandle {
-}

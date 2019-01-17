@@ -8,7 +8,7 @@
 import UIKit
 import WebKit
 
-class ReadViewController: UIViewController {
+class ReadViewController: UIViewController, LoggerHandle {
     var webView = WKWebView()
     var project: Project!
     

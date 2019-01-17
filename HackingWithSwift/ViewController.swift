@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ViewController: UITableViewController {
+class ViewController: UITableViewController, LoggerHandle {
     let allProjects: [Project] = Bundle.main.decode(from: "projects")
     var showingProjects = [Project]()
     var user = User()
